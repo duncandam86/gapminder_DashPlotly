@@ -1,0 +1,560 @@
+import pandas as pd
+import numpy as np
+import dash
+import dash_table as dt
+import dash_bootstrap_components as dbc
+import dash_core_components as dcc
+import dash_html_components as html
+from dash.dependencies import Input, Output, State
+import plotly.graph_objs as go
+
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+app.config.suppress_callback_exceptions = True
+
+#import data
+df = pd.read_csv('Data/gapminder_dd.csv')
+
+df.columns = ['Country', 'Year', 'Life Expectancy', 'Child Mortality', 'Income', 'Population', 
+            'CO2 emission', 'Human Development Index', 'Number of HIV cases', 'Continent']
+
+print(df.head())
+
+
+#navbar 
+navbar = dbc.NavbarSimple(
+        children=[
+            dbc.NavLink("Overview", href="/", id="page-1-link"),
+            dbc.NavLink("Continent", href="/continent", id="page-2-link"),
+            dbc.NavLink("Country", href="/country", id="page-3-link"),
+        ],
+        brand="Gapminder",
+        brand_href="#",
+        color="primary",
+        dark=True
+)
+
+#body content for overview
+df_1 = df.drop(columns = ['Year', 'Country', 'Continent'])
+
+body_1 = dbc.Row ([
+    dbc.Col([
+            html.P('Select x-axis:'),
+            dcc.Dropdown(
+                options = [
+                    {'label': i, 'value': i } for i in df_1.columns
+               ],
+               id='overview_xaxis',
+               value = 'Life Expectancy'
+            ),
+            html.Br(),
+            html.P('Select y-axis:'),
+            dcc.Dropdown(
+                options = [
+                    {'label': i, 'value': i } for i in df_1.columns
+                ],
+                id='overview_yaxis',
+                value = 'Income'
+            ),
+            html.Br(),
+            html.P('Choose year:'),
+            dcc.Dropdown(
+                options = [
+                    {'label': i, 'value': i } for i in range(1800,2019)
+               ],
+               id ='overview_year',
+               value = 2005
+            ),
+    ],width = 3),
+        
+    dbc.Col([
+            dbc.Tabs(
+                id="tabs", 
+                active_tab = 'overview_visual',
+                children = [
+                    dbc.Tab(
+                        label='Data Visualization', 
+                        tab_id='overview_visual',
+                        children = [
+                            dcc.Graph(
+                                    id = 'overview_graph'
+                                ),    
+                            html.Hr(style = {'width' : '95%'}),
+                            dcc.Graph(
+                                    id = 'xaxis_graph'
+                            ),                                
+                            html.Hr(style = {'width' : '95%'}),
+                            dcc.Graph(
+                                    id = 'yaxis_graph'
+                            )
+                        ]
+                    ), 
+                    dbc.Tab(
+                        label='Data Table', 
+                        tab_id='overview_table',
+                        children = dt.DataTable(
+                            id = 'table_1',
+                            sort_action="native",
+                            style_cell={'textAlign': 'left', 'fontFamily' : 'Courier', 'fontSize':'11pt'},
+                            style_as_list_view=True,
+                            style_header={
+                                'backgroundColor': 'lightgray',
+                                'fontWeight': 'bold'
+                            },
+                            style_data_conditional=[
+                                {
+                                    'if': {'row_index': 'odd'},
+                                    'backgroundColor': 'rgb(248, 248, 248)'
+                                }
+                            ],
+                            fixed_rows={ 'headers': True, 'data': 0 },
+                            style_cell_conditional=[
+                                {'if': {'column_id': 'Country'},
+                                'width': '20%'},
+                                {'if': {'column_id': 'Continent'},
+                                'width': '20%'},
+                                {'if': {'column_id': 'Income'},
+                                'width': '30%'},
+                                {'if': {'column_id': 'CO2 emission'},
+                                'width': '30%'},
+                                {'if': {'column_id': 'Human Development Index'},
+                                'width': '30%'},
+                                {'if': {'column_id': 'Child Mortality'},
+                                'width': '30%'},
+                                {'if': {'column_id': 'Population'},
+                                'width': '30%'},
+                                {'if': {'column_id': 'Number of HIV cases'},
+                                'width': '30%'}
+                            ]
+                        )
+                    )
+                ]
+            )
+    ],width = 9)    
+])
+
+#body content for continent
+continents = df['Continent'].unique()
+print(continents)
+
+body_2 = dbc.Row ([
+    dbc.Col([
+        html.P('Select x-axis:'),
+        dcc.Dropdown(
+                options = [
+                    {'label': i, 'value': i } for i in df_1.columns
+               ],
+               id='cont_xaxis',
+               value = 'Life Expectancy'
+            ),
+            html.Br(),
+            html.P('Select y-axis:'),
+            dcc.Dropdown(
+                options = [
+                    {'label': i, 'value': i } for i in df_1.columns
+                ],
+                id='cont_yaxis',
+                value = 'Income'
+            ),
+            html.Br(),
+            html.P('Select a continent'),
+            dcc.RadioItems(
+                id = 'cont',
+                options=[
+                    {'label': ' {}'.format(cont), 'value': cont} for cont in continents
+                ],
+                value='Asia',
+                labelStyle = {'display':'block'}
+            ),
+            html.Br(),
+            html.P('Choose year:'),
+            dcc.Dropdown(
+                options = [
+                    {'label': i, 'value': i } for i in range(1800,2019)
+                ],
+                id ='cont_year',
+                value = 2005
+            ),      
+        ],width = 3),
+    dbc.Col([
+        dbc.Tabs(
+            id="tabs", 
+                active_tab = 'cont_visual',
+                children = [
+                    dbc.Tab(
+                        label='Data Visualization', 
+                        tab_id='cont_visual',
+                        children = [
+                            dbc.Col([
+                                dcc.Graph(
+                                    id = 'cont_graph'
+                                ),    
+                            ], width = 12),
+                            html.Hr(style = {'width' : '95%'}),
+                            dbc.Row([
+                                dbc.Col([
+                                    dcc.Graph(
+                                        id = 'cont_pie_xaxis'
+                                    ),    
+                                ], width = 6),
+                                dbc.Col([
+                                    dcc.Graph(
+                                        id = 'cont_pie_yaxis'
+                                    ),    
+                                ], width = 6),
+                            ])
+                        ]             
+                    ), 
+                    dbc.Tab(
+                        label='Data Table', 
+                        tab_id='cont_table',
+                        children = dt.DataTable(
+                            id = 'table_2',
+                            sort_action="native",
+                            style_cell={'textAlign': 'left', 'fontFamily' : 'Courier', 'fontSize':'11pt'},
+                            style_as_list_view=True,
+                            style_header={
+                                'backgroundColor': 'lightgray',
+                                'fontWeight': 'bold'
+                            },
+                            style_data_conditional=[
+                                {
+                                    'if': {'row_index': 'odd'},
+                                    'backgroundColor': 'rgb(248, 248, 248)'
+                                }
+                            ],
+                            fixed_rows={ 'headers': True, 'data': 0 },
+                            style_cell_conditional=[
+                                {'if': {'column_id': 'Country'},
+                                'width': '20%'},
+                                {'if': {'column_id': 'Year'},
+                                'width': '20%'},
+                                {'if': {'column_id': 'Income'},
+                                'width': '30%'},
+                                {'if': {'column_id': 'CO2 emission'},
+                                'width': '30%'},
+                                {'if': {'column_id': 'Human Development Index'},
+                                'width': '30%'},
+                                {'if': {'column_id': 'Child Mortality'},
+                                'width': '30%'},
+                                {'if': {'column_id': 'Population'},
+                                'width': '30%'},
+                                {'if': {'column_id': 'Number of HIV cases'},
+                                'width': '30%'}
+                            ]
+                        )
+                    )
+                ]
+        )      
+    ],width = 9)
+])
+
+#body content for country
+body_3 = dbc.Row ([
+    dbc.Col([
+            html.H1('Selection goes here for country')
+        ],width = 4),
+        dbc.Col([
+            html.H2('Graph goes here for country')
+        ],width = 8)
+])
+
+#Layout set up
+app.layout = html.Div([dcc.Location(id='url'),navbar, dbc.Container(id="page-content", className="pt-4")])
+
+#Server setup
+
+#call back to activate toggle between pages/tabs
+@app.callback(
+    [Output(f"page-{i}-link", "active") for i in range(1, 4)],
+    [Input("url", "pathname")],
+)
+def toggle_active_links(pathname):
+    if pathname == "/":
+        # Treat page 1 as the homepage / index
+        return True, False, False
+    return [pathname == f"/page-{i}" for i in range(1, 4)]
+
+#callback to swtich content of the page when click on link on navbar
+@app.callback(
+    Output("page-content", "children"), 
+    [Input("url", "pathname")]
+)
+
+def render_page_content(pathname):
+    if pathname in ["/", "/overview"]:
+        return body_1
+    elif pathname == "/continent":
+        return body_2
+    elif pathname == "/country":
+        return body_3
+    # If the user tries to reach a different page, return a 404 message
+    return dbc.Jumbotron(
+        [
+            html.H1("404: Not found", className="text-danger"),
+            html.Hr(),
+            html.P(f"The pathname {pathname} was not recognised..."),
+        ]
+    )
+
+#=======Rendering Overview Tab=========================================
+#call back for overview_graph
+continents = df['Continent'].unique()
+colors = ['salmon','green','orange','indigo','blue','red']
+con_col = dict(zip(continents, colors))
+
+@app.callback(
+    Output('overview_graph','figure'),
+    [Input('overview_xaxis','value'),
+    Input('overview_yaxis','value'),
+    Input('overview_year','value')]
+)
+#function to render overview graph
+def render_overview_graph(xaxis, yaxis, year):
+    df_year = df[df['Year'] == year]
+    traces = []
+    for cont,col in con_col.items():
+        trace = go.Scatter(
+            x = df_year[df_year['Continent']==cont][xaxis],
+            y = df_year[df_year['Continent']==cont][yaxis],
+            mode = 'markers',
+            marker = dict(color = col),
+            name = cont,
+            hovertext = df_year[df_year['Continent']==cont]['Country']
+        )
+        traces.append(trace)
+    
+    layout = go.Layout(
+        xaxis = dict(title = xaxis,showgrid = True, gridcolor = 'lightgray'),
+        yaxis = dict(title = yaxis,showgrid = True, gridcolor = 'lightgray'),
+        paper_bgcolor = 'white',
+        plot_bgcolor = 'white',
+    )
+        
+    fig = go.Figure(data = traces, layout = layout)
+    
+    fig.update_layout(
+        height =  400,
+        margin = dict(t = 30)
+    )
+    return fig
+
+#call back for xaxis_graph vs year
+@app.callback(
+    Output('xaxis_graph', 'figure'),
+    [Input('overview_xaxis','value')]
+)
+def render_xaxis_graph(xaxis):
+    df_cont_year = df.groupby(['Continent','Year'])[xaxis].mean().reset_index()
+    traces = []
+    for cont,col in con_col.items():
+        trace = go.Scatter(
+            x = df_cont_year['Year'],
+            y = df_cont_year[df_cont_year['Continent']==cont][xaxis],
+            mode = 'markers+lines',
+            name = cont,
+            marker = dict(color = col),
+            line = dict(color = col),
+        )
+        traces.append(trace)
+
+    layout = go.Layout(
+        title = '{} over year'.format(xaxis.title()),
+        yaxis = dict(title = xaxis,showgrid = True, gridcolor = 'lightgray'),
+        paper_bgcolor = 'white',
+        plot_bgcolor = 'white',
+    )
+    
+    fig = go.Figure(data = traces, layout = layout)
+    
+    fig.update_layout(
+        height =  400,
+        margin = dict(t = 30)
+        
+    )
+    return fig
+
+#call back for yaxis_graph vs year
+@app.callback(
+    Output('yaxis_graph', 'figure'),
+    [Input('overview_yaxis','value')]
+)
+def render_yaxis_graph(yaxis):
+    df_cont_year = df.groupby(['Continent','Year'])[yaxis].mean().reset_index()
+    traces = []
+    for cont,col in con_col.items():
+        trace = go.Scatter(
+            x = df_cont_year['Year'],
+            y = df_cont_year[df_cont_year['Continent']==cont][yaxis],
+            mode = 'markers+lines',
+            name = cont,
+            marker = dict(color = col),
+            line = dict(color = col),
+        )
+        traces.append(trace)
+
+    layout = go.Layout(
+        title =  '{} over year'.format(yaxis.title()), 
+        yaxis = dict(title = yaxis,showgrid = True, gridcolor = 'lightgray'),
+        paper_bgcolor = 'white',
+        plot_bgcolor = 'white',
+    )
+    
+    fig = go.Figure(data = traces, layout = layout)
+    
+    fig.update_layout(
+        height =  400,
+        margin = dict(t = 30)
+    )
+    return fig
+
+#call back for data class of datatable
+@app.callback(
+    Output('table_1','data'),
+    [Input('overview_year','value'),
+    Input('overview_xaxis','value'),
+    Input('overview_yaxis','value'),
+    Input('table_1', 'page_current'),
+    Input('table_1', 'page_size')]
+)
+def render_data_overview_table(year,xaxis, yaxis, page_current, page_size):
+    df_year = df[df['Year']==year][['Country',xaxis, yaxis,'Continent']]
+    # df_year = df_year.iloc[page_current*page_size:(page_current+ 1)*page_size]
+    data = df_year.to_dict('records')    
+    return data
+
+#call back for column class of datatable
+@app.callback(
+    Output('table_1','columns'),
+    [Input('overview_year','value'),
+    Input('overview_xaxis','value'),
+    Input('overview_yaxis','value')]
+)
+def render_columns_overview_table(year,xaxis, yaxis):
+    df_year = df[df['Year']==year][['Country',xaxis, yaxis,'Continent']]
+    columns = [{'id': c, 'name': c} for c in df_year.columns]  
+    return columns
+
+#+++++++---------------+++++++Rendering continent tab-----------------
+#call back for cont_graph 
+@app.callback(
+    Output('cont_graph','figure'),
+    [Input('cont_xaxis','value'),
+    Input('cont_yaxis','value'),
+    Input('cont','value'),
+    Input('cont_year','value')]
+)
+
+def render_cont_graph(xaxis,yaxis,cont,year):
+    df_cont_year = df[(df['Continent'] == cont) & (df['Year'] == year)]
+    data = [go.Scatter(
+        x = df_cont_year[xaxis],
+        y = df_cont_year[yaxis],
+        mode = 'markers',
+        marker = dict(symbol = 2, color = 'purple', size = 10),
+        hovertext = df_cont_year['Country']
+    )]
+
+    layout = go.Layout(
+        xaxis = dict(title = xaxis, showgrid = True, gridcolor = 'lightgray'),
+        yaxis = dict(title = yaxis, showgrid = True, gridcolor = 'lightgray'),
+        paper_bgcolor = 'white',
+        plot_bgcolor = 'white',
+        
+    )
+
+    figure = go.Figure(data = data, layout = layout)
+    return figure
+
+#call back for cont_pie_xaxis
+@app.callback(
+    Output('cont_pie_xaxis','figure'),
+    [Input('cont_xaxis','value'),
+    Input('cont','value'),
+    Input('cont_year','value')]
+)
+
+def render_cont_pie_xaxis(xaxis, cont, year):
+    df_cont_year = df[(df['Continent']==cont) & (df['Year']==year)]
+    data = [go.Pie(
+        labels = df_cont_year['Country'],
+        values = df_cont_year[xaxis],
+        showlegend = False,
+        textinfo = 'label+value',
+        hoverinfo = 'label+percent',
+        textposition = 'inside',
+        opacity = 0.85
+    )] 
+    layout = go.Layout(
+        title = dict(text = '{} of {} in {}'.format(xaxis,cont,year),pad = dict(l=30)),
+        width = 350,
+        margin = dict(l=10, r=10, t=30,b=10)
+    )
+    figure =  go.Figure(data = data, layout = layout)
+    return figure
+
+#call back for cont_pie_yaxis
+@app.callback(
+    Output('cont_pie_yaxis','figure'),
+    [Input('cont_yaxis','value'),
+    Input('cont','value'),
+    Input('cont_year','value')]
+)
+
+def render_cont_pie_yaxis(yaxis, cont, year):
+    df_cont_year = df[(df['Continent']==cont) & (df['Year']==year)]
+    data = [go.Pie(
+        labels = df_cont_year['Country'],
+        values = df_cont_year[yaxis],
+        showlegend = False,
+        textinfo = 'label+value',
+        hoverinfo = 'label+percent',
+        textposition = 'inside',
+        hole = .6,
+        opacity = 0.85
+    )] 
+    layout = go.Layout(
+        title = dict(text = '{} of {} in {}'.format(yaxis,cont,year), pad = dict(l=30)),
+        width = 350,
+        margin = dict(l=10, r=10, t=30,b=10)
+    )
+    figure =  go.Figure(data = data, layout = layout)
+    return figure
+
+#call back for cont table data class
+@app.callback(
+    Output('table_2','data'),
+    [Input('cont_xaxis','value'),
+    Input('cont_yaxis','value'),
+    Input('cont','value'),
+    Input('cont_year','value')]
+)
+
+def render_cont_table_data(xaxis, yaxis, cont, year):
+    df_cont_year = df[(df['Continent']==cont) & (df['Year'] == year)]
+    df_cont_year = df_cont_year[['Country','Year',xaxis,yaxis]]
+    data = df_cont_year.to_dict('records')
+    return data
+
+#call back for cont table columns class
+@app.callback(
+    Output('table_2','columns'),
+    [Input('cont_xaxis','value'),
+    Input('cont_yaxis','value'),
+    Input('cont','value'),
+    Input('cont_year','value')]
+)
+
+def render_cont_table_columns(xaxis, yaxis, cont, year):
+    df_cont_year = df[(df['Continent']==cont) & (df['Year'] == year)]
+    df_cont_year_column = df_cont_year[['Country','Year',xaxis,yaxis]]
+    columns = [{'id' : col, 'name':col} for col in df_cont_year_column.columns]
+    return columns
+
+#==================== Render country tab ============================
+
+
+#run app
+if __name__ == '__main__':
+    app.run_server(port=8000, debug = True)
+
