@@ -7,6 +7,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
+import math
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -17,8 +18,6 @@ df = pd.read_csv('Data/gapminder_dd.csv')
 
 df.columns = ['Country', 'Year', 'Life Expectancy', 'Child Mortality', 'Income', 'Population', 
             'CO2 emission', 'Human Development Index', 'Number of HIV cases', 'Continent']
-
-print(df.head())
 
 
 #navbar 
@@ -252,8 +251,16 @@ body_2 = dbc.Row ([
 #body content for country
 body_3 = dbc.Row ([
     dbc.Col([
-            html.H1('Selection goes here for country')
-        ],width = 4),
+            html.P('Select country'),
+            dcc.Dropdown(
+                id = 'country',
+                options = [{'label': country, 'value': country} for country in df['Country'].unique()],
+                multi = True,
+                value = ['Vietnam','Gabon']
+            ),
+            html.Br(),
+            
+        ],width = 3),
         dbc.Col([
             html.H2('Graph goes here for country')
         ],width = 8)
@@ -311,16 +318,36 @@ con_col = dict(zip(continents, colors))
 )
 #function to render overview graph
 def render_overview_graph(xaxis, yaxis, year):
-    df_year = df[df['Year'] == year]
     traces = []
     for cont,col in con_col.items():
+        df_year = df[df['Year'] == year]
+        df_year_cont = df_year[df_year['Continent'] == cont]
+        hover_text = []
+        for i, row in df_year_cont.iterrows():
+            hover_text.append(('Country: {country}<br>'+
+                            '{xaxis}: {rowxaxis} <br>'+
+                            '{yaxis}: {rowyaxis} <br>'+
+                                'Year: {year}').format(country=row['Country'],
+                                                    xaxis= xaxis,
+                                                    rowxaxis = row[xaxis],
+                                                    yaxis= yaxis,
+                                                    rowyaxis = row[yaxis],
+                                                    year=row['Year']))
+        df_year_cont.loc[:,'Text'] = hover_text
+
         trace = go.Scatter(
-            x = df_year[df_year['Continent']==cont][xaxis],
-            y = df_year[df_year['Continent']==cont][yaxis],
+            x = df_year_cont[xaxis],
+            y = df_year_cont[yaxis],
             mode = 'markers',
-            marker = dict(color = col),
+            marker = dict(symbol = 0, 
+                    color = col, 
+                    size  = df_year_cont['Population'],
+                    sizemode = 'area',
+                    sizeref  = 2*max(df_year['Population'])/(60.**2),
+                    sizemin = 5,
+                    opacity = 0.7),
             name = cont,
-            hovertext = df_year[df_year['Continent']==cont]['Country']
+            hovertext = hover_text
         )
         traces.append(trace)
     
@@ -359,8 +386,9 @@ def render_xaxis_graph(xaxis):
         traces.append(trace)
 
     layout = go.Layout(
-        title = '{} over year'.format(xaxis.title()),
+        title = '{} over year'.format(xaxis),
         yaxis = dict(title = xaxis,showgrid = True, gridcolor = 'lightgray'),
+        xaxis = dict(showgrid = True, gridcolor = 'lightgray'),
         paper_bgcolor = 'white',
         plot_bgcolor = 'white',
     )
@@ -396,6 +424,7 @@ def render_yaxis_graph(yaxis):
     layout = go.Layout(
         title =  '{} over year'.format(yaxis.title()), 
         yaxis = dict(title = yaxis,showgrid = True, gridcolor = 'lightgray'),
+        xaxis = dict(showgrid = True, gridcolor = 'lightgray'),
         paper_bgcolor = 'white',
         plot_bgcolor = 'white',
     )
@@ -447,12 +476,28 @@ def render_columns_overview_table(year,xaxis, yaxis):
 
 def render_cont_graph(xaxis,yaxis,cont,year):
     df_cont_year = df[(df['Continent'] == cont) & (df['Year'] == year)]
+    hover_text = []
+    for i, row in df_cont_year.iterrows():
+        hover_text.append(('Country: {country} <br>'+
+                        '{xaxis}: {rowxaxis} <br>'+
+                        '{yaxis}: {rowyaxis} <br>').format(
+                            country = row['Country'],
+                            xaxis =  xaxis,
+                            rowxaxis = row[xaxis],
+                            yaxis = yaxis,
+                            rowyaxis = row[yaxis]))
+    
     data = [go.Scatter(
         x = df_cont_year[xaxis],
         y = df_cont_year[yaxis],
         mode = 'markers',
-        marker = dict(symbol = 2, color = 'purple', size = 10),
-        hovertext = df_cont_year['Country']
+        marker = dict(symbol = 0, 
+                    color = 'blue', 
+                    size  = df_cont_year['Population'],
+                    sizemode = 'area',
+                    sizeref  = 2*max(df_cont_year['Population'])/(40.**2),
+                    sizemin  = 6),
+        hovertext = hover_text
     )]
 
     layout = go.Layout(
@@ -460,7 +505,7 @@ def render_cont_graph(xaxis,yaxis,cont,year):
         yaxis = dict(title = yaxis, showgrid = True, gridcolor = 'lightgray'),
         paper_bgcolor = 'white',
         plot_bgcolor = 'white',
-        
+        margin = dict(t = 30) 
     )
 
     figure = go.Figure(data = data, layout = layout)
@@ -481,8 +526,9 @@ def render_cont_pie_xaxis(xaxis, cont, year):
         values = df_cont_year[xaxis],
         showlegend = False,
         textinfo = 'label+value',
-        hoverinfo = 'label+percent',
+        hoverinfo = 'label+percent+value',
         textposition = 'inside',
+        hole = 0.6,
         opacity = 0.85
     )] 
     layout = go.Layout(
@@ -508,7 +554,7 @@ def render_cont_pie_yaxis(yaxis, cont, year):
         values = df_cont_year[yaxis],
         showlegend = False,
         textinfo = 'label+value',
-        hoverinfo = 'label+percent',
+        hoverinfo = 'label+percent+value',
         textposition = 'inside',
         hole = .6,
         opacity = 0.85
