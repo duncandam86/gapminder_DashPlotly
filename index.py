@@ -7,7 +7,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
-import math
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -133,9 +132,6 @@ body_1 = dbc.Row ([
 ])
 
 #body content for continent
-continents = df['Continent'].unique()
-print(continents)
-
 body_2 = dbc.Row ([
     dbc.Col([
         html.P('Select x-axis:'),
@@ -160,7 +156,7 @@ body_2 = dbc.Row ([
             dcc.RadioItems(
                 id = 'cont',
                 options=[
-                    {'label': ' {}'.format(cont), 'value': cont} for cont in continents
+                    {'label': ' {}'.format(cont), 'value': cont} for cont in df['Continent'].unique()
                 ],
                 value='Asia',
                 labelStyle = {'display':'block'}
@@ -251,19 +247,80 @@ body_2 = dbc.Row ([
 #body content for country
 body_3 = dbc.Row ([
     dbc.Col([
-            html.P('Select country'),
-            dcc.Dropdown(
-                id = 'country',
-                options = [{'label': country, 'value': country} for country in df['Country'].unique()],
-                multi = True,
-                value = ['Vietnam','Gabon']
+        html.P('Select country:'),
+        dcc.Dropdown(
+            id = 'country',
+            options = [{'label': country, 'value': country} for country in df['Country'].unique()],
+            multi = True,
+            value = ['Vietnam','Gabon','Tuvalu','Slovakia','Jamaica','Chile']
+        ),
+        html.Br(),
+        html.P('Select a catergory:'),
+        dcc.RadioItems(
+            id = 'country_cat_1',
+            options = [{'label': ' {}'.format(cat), 'value': cat} for cat in df_1.columns],
+            labelStyle = {'display':'block'} 
+        ),
+    ],width = 3),
+    dbc.Col([
+        dbc.Tabs([
+            dbc.Tab(
+                label = 'Data Visualization',
+                children = [
+                    dbc.Col([
+                        dcc.Graph(
+                            id = 'country_graph_cat_1'
+                        )
+                    ],width = 12),
+                    html.Hr(style = {'width':'95%'}),
+                    dbc.Col([
+                        dcc.Graph(
+                            id = 'country_compare_cat_1'
+                        )
+                    ],width = 12)
+                ]      
             ),
-            html.Br(),
-            
-        ],width = 3),
-        dbc.Col([
-            html.H2('Graph goes here for country')
-        ],width = 8)
+            dbc.Tab(
+                label='Data Table', 
+                tab_id='cont_table',
+                children = dt.DataTable(
+                    id = 'table_2',
+                    sort_action="native",
+                    style_cell={'textAlign': 'left', 'fontFamily' : 'Courier', 'fontSize':'11pt'},
+                    style_as_list_view=True,
+                    style_header={
+                        'backgroundColor': 'lightgray',
+                        'fontWeight': 'bold'
+                    },
+                    style_data_conditional=[
+                        {
+                            'if': {'row_index': 'odd'},
+                            'backgroundColor': 'rgb(248, 248, 248)'
+                        }
+                    ],
+                    fixed_rows={ 'headers': True, 'data': 0 },
+                    style_cell_conditional=[
+                        {'if': {'column_id': 'Country'},
+                        'width': '20%'},
+                        {'if': {'column_id': 'Year'},
+                        'width': '20%'},
+                        {'if': {'column_id': 'Income'},
+                        'width': '30%'},
+                        {'if': {'column_id': 'CO2 emission'},
+                        'width': '30%'},
+                        {'if': {'column_id': 'Human Development Index'},
+                        'width': '30%'},
+                        {'if': {'column_id': 'Child Mortality'},
+                        'width': '30%'},
+                        {'if': {'column_id': 'Population'},
+                        'width': '30%'},
+                        {'if': {'column_id': 'Number of HIV cases'},
+                        'width': '30%'}
+                    ]
+                )
+            )
+        ])       
+    ],width = 9)
 ])
 
 #Layout set up
@@ -598,6 +655,25 @@ def render_cont_table_columns(xaxis, yaxis, cont, year):
     return columns
 
 #==================== Render country tab ============================
+
+#call back fro country_graph_cat_1
+# @app.callback(
+#     Output('country_graph_cat_1', 'figure'),
+#     [Input('country','value'),
+#     Input('country_cat_1','value')]
+# )
+# #rendering country_graph_cat1
+# def render_country_graph_cat1(country, cat1):
+
+
+
+
+
+
+
+
+
+
 
 
 #run app
