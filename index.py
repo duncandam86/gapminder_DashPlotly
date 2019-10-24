@@ -329,8 +329,8 @@ html.P(
 ),
 dcc.RangeSlider(
     id = 'country_year',
-    marks = {year : '{}'.format(year) for year in range (1801,2019,10)},
-    min = 1801,
+    marks = {year : '{}'.format(year) for year in range (1800,2019,10)},
+    min = 1800,
     max = 2018,
     step = 1,
     value = [1995,2005]
