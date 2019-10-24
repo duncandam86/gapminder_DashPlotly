@@ -10,6 +10,7 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server
 
 app.config.suppress_callback_exceptions = True
 
@@ -797,5 +798,5 @@ def render_large_graph(years, countries, cat):
 
 #run app
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server(port = 8000, debug = True)
 
