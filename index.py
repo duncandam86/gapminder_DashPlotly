@@ -95,7 +95,7 @@ body_1 = dbc.Row ([
                         children = dt.DataTable(
                             id = 'table_1',
                             sort_action="native",
-                            style_cell={'textAlign': 'left', 'fontFamily' : 'Courier', 'fontSize':'11pt'},
+                            style_cell={'textAlign': 'left', 'fontFamily' : 'Courier', 'fontSize':'11pt','textOverflow':'clip'},
                             style_as_list_view=True,
                             style_header={
                                 'backgroundColor': 'lightgray',
@@ -208,7 +208,7 @@ body_2 = dbc.Row ([
                         children = dt.DataTable(
                             id = 'table_2',
                             sort_action="native",
-                            style_cell={'textAlign': 'left', 'fontFamily' : 'Courier', 'fontSize':'11pt'},
+                            style_cell={'textAlign': 'left', 'fontFamily' : 'Courier', 'fontSize':'11pt','textOverflow':'clip'},
                             style_as_list_view=True,
                             style_header={
                                 'backgroundColor': 'lightgray',
@@ -283,7 +283,7 @@ body_3 = [dbc.Row ([
                 children = dt.DataTable(
                     id = 'table_3',
                     sort_action="native",
-                    style_cell={'textAlign': 'left', 'fontFamily' : 'Courier', 'fontSize':'11pt'},
+                    style_cell={'textAlign': 'left', 'fontFamily' : 'Courier', 'fontSize':'11pt','textOverflow':'clip'},
                     style_as_list_view=True,
                     style_header={
                         'backgroundColor': 'lightgray',
