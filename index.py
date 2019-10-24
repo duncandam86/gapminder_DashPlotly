@@ -29,7 +29,7 @@ navbar = dbc.NavbarSimple(
                 dbc.NavLink("Country", href="/country", id="page-3-link"),
             ],
             brand="Gapminder",
-            brand_href="#",
+            brand_href="/",
             color="primary",
             dark=True
 )
