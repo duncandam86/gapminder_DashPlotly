@@ -103,8 +103,8 @@ body_1 = dbc.Row ([
                             },
                             style_data_conditional=[
                                 {
-                                    'if': {'row_index': 'odd'},
-                                    'backgroundColor': 'rgb(248, 248, 248)'
+                                'if': {'row_index': 'odd'},
+                                'backgroundColor': 'rgb(248, 248, 248)'
                                 }
                             ],
                             fixed_rows={ 'headers': True, 'data': 0 },
