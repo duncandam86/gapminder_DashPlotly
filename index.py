@@ -608,7 +608,7 @@ def render_cont_pie_xaxis(xaxis, cont, year):
         opacity = 0.85
     )] 
     layout = go.Layout(
-        title = dict(text = '{} of {} in {}'.format(xaxis,cont,year),pad = dict(l=30)),
+        title = dict(text = '{} of {}'.format(xaxis,cont), yref = 'paper'),
         # width = 320,
         margin = dict(l=10, r=10, t=30,b=10)
     )
@@ -636,7 +636,7 @@ def render_cont_pie_yaxis(yaxis, cont, year):
         opacity = 0.85
     )] 
     layout = go.Layout(
-        title = dict(text = '{} of {} in {}'.format(yaxis,cont,year), pad = dict(l=30)),
+        title = dict(text = '{} of {}'.format(yaxis,cont), yref = 'paper'),
         # width = 320,
         margin = dict(l=10, r=10, t=30,b=10)
     )
