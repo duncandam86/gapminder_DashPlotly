@@ -7,6 +7,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
+from plotly.subplots import make_subplots
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -15,21 +16,21 @@ app.config.suppress_callback_exceptions = True
 #import data
 df = pd.read_csv('Data/gapminder_dd.csv')
 
-df.columns = ['Country', 'Year', 'Life Expectancy', 'Child Mortality', 'Income', 'Population', 
-            'CO2 emission', 'Human Development Index', 'Number of HIV cases', 'Continent']
+df.columns = ['Country', 'Year', 'Life Expectancy', 'Child Mortality (per 1000 born)', 'Income (per person)', 'Population', 
+            'CO2 emission (tonnes per person)', 'Human Development Index', 'Number of HIV cases', 'Continent']
 
 
 #navbar 
 navbar = dbc.NavbarSimple(
-        children=[
-            dbc.NavLink("Overview", href="/", id="page-1-link"),
-            dbc.NavLink("Continent", href="/continent", id="page-2-link"),
-            dbc.NavLink("Country", href="/country", id="page-3-link"),
-        ],
-        brand="Gapminder",
-        brand_href="#",
-        color="primary",
-        dark=True
+            children=[
+                dbc.NavLink("Overview", href="/", id="page-1-link"),
+                dbc.NavLink("Continent", href="/continent", id="page-2-link"),
+                dbc.NavLink("Country", href="/country", id="page-3-link"),
+            ],
+            brand="Gapminder",
+            brand_href="#",
+            color="primary",
+            dark=True
 )
 
 #body content for overview
@@ -52,7 +53,7 @@ body_1 = dbc.Row ([
                     {'label': i, 'value': i } for i in df_1.columns
                 ],
                 id='overview_yaxis',
-                value = 'Income'
+                value = 'Income (per person)'
             ),
             html.Br(),
             html.P('Choose year:'),
@@ -111,13 +112,13 @@ body_1 = dbc.Row ([
                                 'width': '20%'},
                                 {'if': {'column_id': 'Continent'},
                                 'width': '20%'},
-                                {'if': {'column_id': 'Income'},
+                                {'if': {'column_id': 'Income (per person)'},
                                 'width': '30%'},
-                                {'if': {'column_id': 'CO2 emission'},
+                                {'if': {'column_id': 'CO2 emission (tonnes per person)'},
                                 'width': '30%'},
                                 {'if': {'column_id': 'Human Development Index'},
                                 'width': '30%'},
-                                {'if': {'column_id': 'Child Mortality'},
+                                {'if': {'column_id': 'Child Mortality (per 1000 born)'},
                                 'width': '30%'},
                                 {'if': {'column_id': 'Population'},
                                 'width': '30%'},
@@ -149,10 +150,10 @@ body_2 = dbc.Row ([
                     {'label': i, 'value': i } for i in df_1.columns
                 ],
                 id='cont_yaxis',
-                value = 'Income'
+                value = 'Income (per person)'
             ),
             html.Br(),
-            html.P('Select a continent'),
+            html.P('Select a continent:'),
             dcc.RadioItems(
                 id = 'cont',
                 options=[
@@ -224,13 +225,13 @@ body_2 = dbc.Row ([
                                 'width': '20%'},
                                 {'if': {'column_id': 'Year'},
                                 'width': '20%'},
-                                {'if': {'column_id': 'Income'},
+                                {'if': {'column_id': 'Income (per person)'},
                                 'width': '30%'},
-                                {'if': {'column_id': 'CO2 emission'},
+                                {'if': {'column_id': 'CO2 emission (tonnes per person)'},
                                 'width': '30%'},
                                 {'if': {'column_id': 'Human Development Index'},
                                 'width': '30%'},
-                                {'if': {'column_id': 'Child Mortality'},
+                                {'if': {'column_id': 'Child Mortality (per 1000 born)'},
                                 'width': '30%'},
                                 {'if': {'column_id': 'Population'},
                                 'width': '30%'},
@@ -245,46 +246,41 @@ body_2 = dbc.Row ([
 ])
 
 #body content for country
-body_3 = dbc.Row ([
+body_3 = [dbc.Row ([
     dbc.Col([
+        html.P('Select a catergory:'),
+        dcc.RadioItems(
+            id = 'country_cat',
+            options = [{'label': ' {}'.format(cat), 'value': cat} for cat in df_1.columns],
+            labelStyle = {'display':'block'}, 
+            value = 'Income (per person)'
+        ),
+        html.Br(),
         html.P('Select country:'),
         dcc.Dropdown(
             id = 'country',
-            options = [{'label': country, 'value': country} for country in df['Country'].unique()],
+            options = [{'label': country, 'value': country} for country in df['Country'].sort_values().unique()],
             multi = True,
-            value = ['Vietnam','Gabon','Tuvalu','Slovakia','Jamaica','Chile']
-        ),
-        html.Br(),
-        html.P('Select a catergory:'),
-        dcc.RadioItems(
-            id = 'country_cat_1',
-            options = [{'label': ' {}'.format(cat), 'value': cat} for cat in df_1.columns],
-            labelStyle = {'display':'block'} 
-        ),
+            value = ['Vietnam','Gabon','Tuvalu','Slovenia','Jamaica','Chile']
+        ),    
     ],width = 3),
     dbc.Col([
         dbc.Tabs([
-            dbc.Tab(
+            dbc.Tab( 
                 label = 'Data Visualization',
                 children = [
                     dbc.Col([
                         dcc.Graph(
-                            id = 'country_graph_cat_1'
+                            id = 'country_compare_cat'
                         )
                     ],width = 12),
-                    html.Hr(style = {'width':'95%'}),
-                    dbc.Col([
-                        dcc.Graph(
-                            id = 'country_compare_cat_1'
-                        )
-                    ],width = 12)
                 ]      
             ),
             dbc.Tab(
                 label='Data Table', 
-                tab_id='cont_table',
+                tab_id='country_table',
                 children = dt.DataTable(
-                    id = 'table_2',
+                    id = 'table_3',
                     sort_action="native",
                     style_cell={'textAlign': 'left', 'fontFamily' : 'Courier', 'fontSize':'11pt'},
                     style_as_list_view=True,
@@ -304,13 +300,15 @@ body_3 = dbc.Row ([
                         'width': '20%'},
                         {'if': {'column_id': 'Year'},
                         'width': '20%'},
-                        {'if': {'column_id': 'Income'},
+                         {'if': {'column_id': 'Continent'},
+                        'width': '20%'},
+                        {'if': {'column_id': 'Income (per person)'},
                         'width': '30%'},
-                        {'if': {'column_id': 'CO2 emission'},
+                        {'if': {'column_id': 'CO2 emission (tonnes per person)'},
                         'width': '30%'},
                         {'if': {'column_id': 'Human Development Index'},
                         'width': '30%'},
-                        {'if': {'column_id': 'Child Mortality'},
+                        {'if': {'column_id': 'Child Mortality (per 1000 born)'},
                         'width': '30%'},
                         {'if': {'column_id': 'Population'},
                         'width': '30%'},
@@ -320,8 +318,28 @@ body_3 = dbc.Row ([
                 )
             )
         ])       
-    ],width = 9)
-])
+    ],width = 9),
+]), 
+html.Hr(style = {'width':'95%'}), 
+html.P(
+    id = 'selected_years'
+),
+dcc.RangeSlider(
+    id = 'country_year',
+    marks = {year : '{}'.format(year) for year in range (1801,2019,10)},
+    min = 1801,
+    max = 2018,
+    step = 1,
+    value = [1995,2005]
+),
+html.Br(),
+dbc.Row([
+    dbc.Col([
+        dcc.Graph(
+            id = 'graph_large'
+        )
+    ], width = 12)
+])]
 
 #Layout set up
 app.layout = html.Div([dcc.Location(id='url'),navbar, dbc.Container(id="page-content", className="pt-4")])
@@ -390,8 +408,6 @@ def render_overview_graph(xaxis, yaxis, year):
                                                     yaxis= yaxis,
                                                     rowyaxis = row[yaxis],
                                                     year=row['Year']))
-        df_year_cont.loc[:,'Text'] = hover_text
-
         trace = go.Scatter(
             x = df_year_cont[xaxis],
             y = df_year_cont[yaxis],
@@ -479,7 +495,7 @@ def render_yaxis_graph(yaxis):
         traces.append(trace)
 
     layout = go.Layout(
-        title =  '{} over year'.format(yaxis.title()), 
+        title =  '{} over year'.format(yaxis), 
         yaxis = dict(title = yaxis,showgrid = True, gridcolor = 'lightgray'),
         xaxis = dict(showgrid = True, gridcolor = 'lightgray'),
         paper_bgcolor = 'white',
@@ -655,25 +671,128 @@ def render_cont_table_columns(xaxis, yaxis, cont, year):
     return columns
 
 #==================== Render country tab ============================
+# df_country = df[df['Country']=='Vietnam']['Population'].values
+# print(df_country)
 
-#call back fro country_graph_cat_1
-# @app.callback(
-#     Output('country_graph_cat_1', 'figure'),
-#     [Input('country','value'),
-#     Input('country_cat_1','value')]
-# )
-# #rendering country_graph_cat1
-# def render_country_graph_cat1(country, cat1):
+#call back to country_graph_cat
+@app.callback(
+    Output('country_compare_cat', 'figure'),
+    [Input('country','value'),
+    Input('country_cat','value')]
+)
+#rendering country_graph_cat1
+def render_country_compare_cat(country,cat):
+    data = []
+    for c in country:
+        df_country = df[df['Country'] == c]
+        hover_text = []
+        for i, row in df_country.iterrows():
+            hover_text.append(('Country: {country} <br>'+
+                                '{cat} : {rowcat} <br>' +
+                                'Year: {year}').format(country=row['Country'],
+                                                    cat = cat,
+                                                    rowcat = row[cat],
+                                                    year=row['Year']))
+        trace = go.Scatter(
+            x = df_country['Year'],
+            y = df_country[cat],
+            mode = 'markers+lines',
+            marker = dict(size = 6),
+            name = c,
+            hovertext = hover_text,
+            fill ='tozeroy',
+            fillcolor= 'rgba(169, 169, 169,0.1)'
+        )
+        data.append(trace) 
 
+    layout = go.Layout(
+        title = dict(text = '{cat} over year'.format(cat = cat), pad = dict(l = 0)),
+        xaxis = dict(showgrid = True, gridcolor = 'lightgray'),
+        yaxis = dict(title = cat, showgrid = True, gridcolor = 'lightgray'),
+        paper_bgcolor = 'white',
+        plot_bgcolor = 'white',
+        margin = dict(t=60, b = 30),
+        height =  400,
+        barmode = 'group'
+    )
 
+    figure = go.Figure(data = data, layout = layout)
 
+    return figure
 
+#call back for country datatable data
+@app.callback(
+    Output('table_3','data'),
+    [Input('country','value'),
+    Input('country_cat', 'value')]
+)
 
+#rendering data class of country datatable 
+def rendering_country_table_data(country, cat):
+    df_country = df[df['Country'].isin(country)][['Country','Year',cat,'Continent']]
+    data = df_country.to_dict('records')
+    return data
 
+#call back for country datatable columns
+@app.callback(
+    Output('table_3','columns'),
+    [Input('country','value'),
+    Input('country_cat','value')]
+)
 
+#rendering columns class of country datatable
+def rendering_country_table_column(country, cat):
+    df_country = df[df['Country'].isin(country)][['Country','Year',cat,'Continent']]
+    columns = [{'id':col, 'name': col} for col in df_country.columns]
+    return columns
 
+#call back selected range   
+@app.callback(
+    Output('selected_years','children'),
+    [Input('country_year', 'value')]
+)
+#rendering selected range
+def render_range_year(value):
+    text = html.B('Selected range: {} to {}'.format(value[0],value[1]), 
+                        style = {'color':'gray'})
+    return text 
 
+#call back large graph (box plot)
+@app.callback(
+    Output('graph_large','figure'),
+    [Input('country_year','value'),
+    Input('country','value'),
+    Input('country_cat','value')]
+)
+#rendering large graph (box plot)
+def render_large_graph(years, countries, cat):
+    data = []
+    year_range = list(range(years[0], years[1]+1))
+    for c in countries:
+        df_country = df[df['Country'] == c]
+        df_country_year = df_country[df_country['Year'].isin(year_range)]
+        trace = go.Violin(
+            y = df_country_year[cat],
+            x = df_country_year['Country'],
+            name = c,
+            box_visible = True,
+            meanline_visible=True,
+            jitter = 0.3
+        )
+        data.append(trace)
+    
+    layout = go.Layout(
+        title = dict(text = 'Comparison of {cat} from {year1} to {year2}'.format(cat = cat, year1 = years[0], year2=years[1])),
+        yaxis = dict(title = cat, showgrid = True, gridcolor = 'lightgray'),
+        xaxis = dict(showgrid = True, gridcolor = 'lightgray'),
+        margin = dict (t = 80),
+        paper_bgcolor = 'white',
+        plot_bgcolor = 'white',
+        showlegend = False
+    )
 
+    figure = go.Figure (data = data, layout = layout) 
+    return figure
 
 
 #run app
