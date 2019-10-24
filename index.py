@@ -177,73 +177,73 @@ body_2 = dbc.Row ([
     dbc.Col([
         dbc.Tabs(
             id="tabs", 
-                active_tab = 'cont_visual',
-                children = [
-                    dbc.Tab(
-                        label='Data Visualization', 
-                        tab_id='cont_visual',
-                        children = [
+            active_tab = 'cont_visual',
+            children = [
+                dbc.Tab(
+                    label='Data Visualization', 
+                    tab_id='cont_visual',
+                    children = [
+                        dbc.Col([
+                            dcc.Graph(
+                                id = 'cont_graph'
+                            ),    
+                        ], width = 12),
+                        html.Hr(style = {'width' : '95%'}),
+                        dbc.Row([
                             dbc.Col([
                                 dcc.Graph(
-                                    id = 'cont_graph'
+                                    id = 'cont_pie_xaxis'
                                 ),    
-                            ], width = 12),
-                            html.Hr(style = {'width' : '95%'}),
-                            dbc.Row([
-                                dbc.Col([
-                                    dcc.Graph(
-                                        id = 'cont_pie_xaxis'
-                                    ),    
-                                ], width = 6),
-                                dbc.Col([
-                                    dcc.Graph(
-                                        id = 'cont_pie_yaxis'
-                                    ),    
-                                ], width = 6),
-                            ])
-                        ]             
-                    ), 
-                    dbc.Tab(
-                        label='Data Table', 
-                        tab_id='cont_table',
-                        children = dt.DataTable(
-                            id = 'table_2',
-                            sort_action="native",
-                            style_cell={'textAlign': 'left', 'fontFamily' : 'Courier', 'fontSize':'11pt','textOverflow':'clip'},
-                            style_as_list_view=True,
-                            style_header={
-                                'backgroundColor': 'lightgray',
-                                'fontWeight': 'bold'
-                            },
-                            style_table = {'overflowY':'scroll'},
-                            style_data_conditional=[
-                                {
-                                    'if': {'row_index': 'odd'},
-                                    'backgroundColor': 'rgb(248, 248, 248)'
-                                }
-                            ],
-                            fixed_rows={ 'headers': True, 'data': 0 },
-                            style_cell_conditional=[
-                                {'if': {'column_id': 'Country'},
-                                'width': '20%'},
-                                {'if': {'column_id': 'Year'},
-                                'width': '20%'},
-                                {'if': {'column_id': 'Income (per person)'},
-                                'width': '30%'},
-                                {'if': {'column_id': 'CO2 emission (tonnes per person)'},
-                                'width': '30%'},
-                                {'if': {'column_id': 'Human Development Index'},
-                                'width': '30%'},
-                                {'if': {'column_id': 'Child Mortality (per 1000 born)'},
-                                'width': '30%'},
-                                {'if': {'column_id': 'Population'},
-                                'width': '30%'},
-                                {'if': {'column_id': 'Number of HIV cases'},
-                                'width': '30%'}
-                            ]
-                        )
+                            ], width = 6),
+                            dbc.Col([
+                                dcc.Graph(
+                                    id = 'cont_pie_yaxis'
+                                ),    
+                            ], width = 6),
+                        ])
+                    ]             
+                ), 
+                dbc.Tab(
+                    label='Data Table', 
+                    tab_id='cont_table',
+                    children = dt.DataTable(
+                        id = 'table_2',
+                        sort_action="native",
+                        style_cell={'textAlign': 'left', 'fontFamily' : 'Courier', 'fontSize':'11pt','textOverflow':'clip'},
+                        style_as_list_view=True,
+                        style_header={
+                            'backgroundColor': 'lightgray',
+                            'fontWeight': 'bold'
+                        },
+                        style_table = {'overflowY':'scroll'},
+                        style_data_conditional=[
+                            {
+                                'if': {'row_index': 'odd'},
+                                'backgroundColor': 'rgb(248, 248, 248)'
+                            }
+                        ],
+                        fixed_rows={ 'headers': True, 'data': 0 },
+                        style_cell_conditional=[
+                            {'if': {'column_id': 'Country'},
+                            'width': '20%'},
+                            {'if': {'column_id': 'Year'},
+                            'width': '20%'},
+                            {'if': {'column_id': 'Income (per person)'},
+                            'width': '30%'},
+                            {'if': {'column_id': 'CO2 emission (tonnes per person)'},
+                            'width': '30%'},
+                            {'if': {'column_id': 'Human Development Index'},
+                            'width': '30%'},
+                            {'if': {'column_id': 'Child Mortality (per 1000 born)'},
+                            'width': '30%'},
+                            {'if': {'column_id': 'Population'},
+                            'width': '30%'},
+                            {'if': {'column_id': 'Number of HIV cases'},
+                            'width': '30%'}
+                        ]
                     )
-                ]
+                )
+            ]
         )      
     ],width = 9)
 ])
@@ -281,7 +281,6 @@ body_3 = [dbc.Row ([
             ),
             dbc.Tab(
                 label='Data Table', 
-                tab_id='country_table',
                 children = dt.DataTable(
                     id = 'table_3',
                     sort_action="native",
@@ -610,7 +609,7 @@ def render_cont_pie_xaxis(xaxis, cont, year):
     )] 
     layout = go.Layout(
         title = dict(text = '{} of {} in {}'.format(xaxis,cont,year),pad = dict(l=30)),
-        width = 350,
+        # width = 320,
         margin = dict(l=10, r=10, t=30,b=10)
     )
     figure =  go.Figure(data = data, layout = layout)
@@ -638,7 +637,7 @@ def render_cont_pie_yaxis(yaxis, cont, year):
     )] 
     layout = go.Layout(
         title = dict(text = '{} of {} in {}'.format(yaxis,cont,year), pad = dict(l=30)),
-        width = 350,
+        # width = 320,
         margin = dict(l=10, r=10, t=30,b=10)
     )
     figure =  go.Figure(data = data, layout = layout)
