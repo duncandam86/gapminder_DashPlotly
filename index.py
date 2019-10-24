@@ -101,6 +101,7 @@ body_1 = dbc.Row ([
                                 'backgroundColor': 'lightgray',
                                 'fontWeight': 'bold'
                             },
+                            style_table = {'overflowY':'scroll'},
                             style_data_conditional=[
                                 {
                                 'if': {'row_index': 'odd'},
@@ -214,6 +215,7 @@ body_2 = dbc.Row ([
                                 'backgroundColor': 'lightgray',
                                 'fontWeight': 'bold'
                             },
+                            style_table = {'overflowY':'scroll'},
                             style_data_conditional=[
                                 {
                                     'if': {'row_index': 'odd'},
@@ -285,6 +287,7 @@ body_3 = [dbc.Row ([
                     sort_action="native",
                     style_cell={'textAlign': 'left', 'fontFamily' : 'Courier', 'fontSize':'11pt','textOverflow':'clip'},
                     style_as_list_view=True,
+                    style_table = {'overflowY':'scroll'},
                     style_header={
                         'backgroundColor': 'lightgray',
                         'fontWeight': 'bold'
